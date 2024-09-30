@@ -14,7 +14,7 @@ def user_exists(key: str = "email", value: str = None):
     user = supabase.from_("users").select("*").eq(key, value).execute()
     return len(user.data) > 0
 
-# Create a new user
+# POST NEW USER
 @router.post("/")
 def create_user(user: User):
     try:
@@ -29,7 +29,7 @@ def create_user(user: User):
 
         # Add user to users table
         user = supabase.from_("users")\
-            .insert({"name": user.name, "email": user_email, "password": str(hashed_password)})\
+            .insert({"first_name": user.first_name, "last_name": user.last_name, "password": str(hashed_password), "email": user_email, })\
             .execute()
 
         # Check if user was added
