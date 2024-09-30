@@ -1,0 +1,7 @@
+fastapi
+
+hvac
+
+supabase
+
+bcrypt
