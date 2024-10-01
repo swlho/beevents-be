@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response, status
 from db.supabase import create_supabase_client
 from app.models import User
 #fn dependencies
@@ -16,7 +16,7 @@ def user_exists(key: str = "email", value: str = None):
 
 # POST NEW USER
 @router.post("/")
-def create_user(user: User):
+def create_user(user: User, response: Response):
     try:
         # Convert email to lowercase
         user_email = user.email.lower()
@@ -25,6 +25,7 @@ def create_user(user: User):
 
         # Check if user already exists
         if user_exists(value=user_email):
+            response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "User already exists"}
 
         # Add user to users table
@@ -36,7 +37,9 @@ def create_user(user: User):
         if user:
             return {"message": "User created successfully"}
         else:
+            response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "User creation failed"}
     except Exception as e:
         print("Error: ", e)
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "User creation failed"}

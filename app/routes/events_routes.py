@@ -1,5 +1,5 @@
 from typing import Union
-from fastapi import APIRouter
+from fastapi import APIRouter, Response, status
 from db.supabase import create_supabase_client
 from app.models import Event
 #fn dependencies
@@ -17,7 +17,7 @@ def event_exists(key: str = "title", value: str = None):
 
 # POST NEW EVENT
 @router.post("/")
-def create_event(event: Event):
+def create_event(event: Event, response: Response):
     try:
         # event_title = event.title
         # # Check if event already exists
@@ -33,14 +33,16 @@ def create_event(event: Event):
         if event:
             return {"message": "Event created successfully"}
         else:
+            response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event creation failed"}
     except Exception as e:
         print("Error: ", e)
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Event creation failed"}
     
 # GET ALL EVENTS OR EVENT BY ID
 @router.get("/")
-def get_event(event_id: Union[str, None] = None):
+def get_event(response: Response, event_id: Union[str, None] = None):
     try:
         if event_id:
             event = supabase.from_("events")\
@@ -58,11 +60,12 @@ def get_event(event_id: Union[str, None] = None):
                 return events
     except Exception as e:
         print(f"Error: {e}")
+        response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "Event not found"}
     
 # DELETE AN EVENT BY EVENT_ID
 @router.delete("/")
-def delete_event(event_id: str):
+def delete_event(event_id: str, response: Response):
     try:        
         # Check if event exists
         if event_exists("event_id", event_id):
@@ -73,7 +76,9 @@ def delete_event(event_id: str):
             return {"message": "Event deleted successfully"}
 
         else:
+            response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event deletion failed"}
     except Exception as e:
         print(f"Error: {e}")
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Event deletion failed"}
