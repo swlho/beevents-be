@@ -26,7 +26,8 @@ def create_event(event: Event):
 
         # Add user to users table
         event = supabase.from_("events")\
-            .insert({"title": event.title, "date_time": event.date_time, "details": event.details, "location": event.location, "map_data": event.map_data, "tags": event.tags, "users_attending": event.users_attending, "is_archived": event.is_archived, "cost": event.cost, "total_revenue": event.total_revenue}).execute()
+            .insert({"title": event.title, "date_time": event.date_time, "details": event.details, "location": event.location, "map_data": event.map_data, "tags": event.tags, "users_attending": event.users_attending, "is_archived": event.is_archived, "cost": event.cost, "total_revenue": event.total_revenue})\
+            .execute()
 
         # Check if user was added
         if event:
