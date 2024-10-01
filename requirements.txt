@@ -5,3 +5,5 @@ hvac
 supabase
 
 bcrypt
+
+uvicorn
