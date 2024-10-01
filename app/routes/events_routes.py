@@ -11,9 +11,9 @@ supabase = create_supabase_client()
 # Initialize the router object
 router = APIRouter()
 
-# def event_exists(key: str = "title", value: str = None):
-#     event = supabase.from_("events").select("*").eq(key, value).execute()
-#     return len(event.data) > 0
+def event_exists(key: str = "title", value: str = None):
+    event = supabase.from_("events").select("*").eq(key, value).execute()
+    return len(event.data) > 0
 
 # POST NEW EVENT
 @router.post("/")
@@ -59,3 +59,21 @@ def get_event(event_id: Union[str, None] = None):
     except Exception as e:
         print(f"Error: {e}")
         return {"message": "Event not found"}
+    
+# DELETE AN EVENT BY EVENT_ID
+@router.delete("/")
+def delete_event(event_id: str):
+    try:        
+        # Check if event exists
+        if event_exists("event_id", event_id):
+            # Delete event
+            supabase.from_("events")\
+                .delete().eq("event_id", event_id)\
+                .execute()
+            return {"message": "Event deleted successfully"}
+
+        else:
+            return {"message": "Event deletion failed"}
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"message": "Event deletion failed"}
