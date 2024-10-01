@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import APIRouter
 from db.supabase import create_supabase_client
 from app.models import Event
@@ -35,3 +36,25 @@ def create_event(event: Event):
     except Exception as e:
         print("Error: ", e)
         return {"message": "Event creation failed"}
+    
+# GET ALL EVENTS OR EVENT BY ID
+@router.get("/")
+def get_event(event_id: Union[str, None] = None):
+    try:
+        if event_id:
+            event = supabase.from_("events")\
+                .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                .eq("event_id", event_id)\
+                .execute()
+
+            if event:
+                return event
+        else:
+            events = supabase.from_("events")\
+                .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                .execute()
+            if events:
+                return events
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"message": "Event not found"}
