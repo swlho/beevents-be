@@ -40,7 +40,21 @@ def create_event(event: Event, response: Response):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Event creation failed"}
     
-# GET ALL EVENTS OR EVENT BY ID
+# GET ALL EVENTS
+@router.get("/")
+def get_event(response: Response, event_id: Union[str, None] = None):
+    try:
+        events = supabase.from_("events")\
+            .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+            .execute()
+        if events:
+            return events
+    except Exception as e:
+        print(f"Error: {e}")
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return {"message": "Events not found"}
+
+#GET EVENT BY ID
 @router.get("/{event_id}")
 def get_event(response: Response, event_id: Union[str, None] = None):
     try:
@@ -52,16 +66,10 @@ def get_event(response: Response, event_id: Union[str, None] = None):
 
             if event:
                 return event
-        else:
-            events = supabase.from_("events")\
-                .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
-                .execute()
-            if events:
-                return events
     except Exception as e:
         print(f"Error: {e}")
         response.status_code = status.HTTP_204_NO_CONTENT
-        return {"message": "Event not found"}
+        return {"message": "Event ID not found"}
     
 # DELETE AN EVENT BY EVENT_ID
 @router.delete("/")
