@@ -41,7 +41,7 @@ def create_event(event: Event, response: Response):
         return {"message": "Event creation failed"}
     
 # GET ALL EVENTS OR EVENT BY ID
-@router.get("/")
+@router.get("/{event_id}")
 def get_event(response: Response, event_id: Union[str, None] = None):
     try:
         if event_id:
