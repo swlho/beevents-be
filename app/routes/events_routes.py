@@ -71,6 +71,23 @@ def get_event(response: Response, event_id: Union[str, None] = None):
         response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "Event ID not found"}
     
+#GET EVENT BY STAFF ID
+@router.get("/staff/{staff_id}")
+def get_event(response: Response, staff_id: Union[str, None] = None):
+    try:
+        if staff_id:
+            events = supabase.from_("events")\
+                .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                .eq("staff_id", staff_id)\
+                .execute()
+
+            if events:
+                return events
+    except Exception as e:
+        print(f"Error: {e}")
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return {"message": "Staff ID not found"}
+    
 # DELETE AN EVENT BY EVENT_ID
 @router.delete("/")
 def delete_event(event_id: str, response: Response):
