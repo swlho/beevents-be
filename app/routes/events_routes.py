@@ -79,6 +79,7 @@ def get_event(response: Response, staff_id: Union[str, None] = None):
             events = supabase.from_("events")\
                 .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
                 .eq("staff_id", staff_id)\
+                .eq("is_archived", 'false')\
                 .execute()
 
             if events:
@@ -107,3 +108,21 @@ def delete_event(event_id: str, response: Response):
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Event deletion failed"}
+
+# PATCH EVENT BY ID - ARCHIVE
+@router.put("/{event_id}")
+def update_event(event_id: str)
+    try:
+        # Check if event exists
+        if event_exists("event_id", event_id):
+            # Update event
+            event = supabase.from_("events")\
+                .update({"is_archived": 'true'})\
+                .eq("event_id", event_id).execute()
+            if user:
+                return {"message": "Event updated successfully"}
+        else:
+            return {"message": "Event update failed"}
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"message": "Event update failed"}
