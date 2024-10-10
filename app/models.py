@@ -8,13 +8,12 @@ class User(BaseModel):
 
 
 class Event(BaseModel):
+    staff_id: int
     title: str
     date_time: str
     details: str
     location: str
-    map_data: str
     tags: list
     users_attending: list
     is_archived: bool
     cost: int
-    total_revenue: int

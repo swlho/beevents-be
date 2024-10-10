@@ -19,18 +19,21 @@ def event_exists(key: str = "title", value: str = None):
 @router.post("/")
 def create_event(event: Event, response: Response):
     try:
-        # event_title = event.title
+        event_id = supabase.from_("events")\
+            .select("event_id")
         # # Check if event already exists
-        # if event_exists(value=event_title):
-        #     return {"message": "Event already exists"}
+        if event_exists(value=event_id):
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return {"message": "Event already exists"}
 
         # Add user to users table
         event = supabase.from_("events")\
-            .insert({"title": event.title, "date_time": event.date_time, "details": event.details, "location": event.location, "map_data": event.map_data, "tags": event.tags, "users_attending": event.users_attending, "is_archived": event.is_archived, "cost": event.cost, "total_revenue": event.total_revenue})\
+            .insert({"staff_id": event.staff_id, "title": event.title, "date_time": event.date_time, "details": event.details, "location": event.location, "tags": event.tags, "users_attending": event.users_attending, "is_archived": event.is_archived, "cost": event.cost})\
             .execute()
 
         # Check if user was added
         if event:
+            response.status_code = status.HTTP_201_CREATED
             return {"message": "Event created successfully"}
         else:
             response.status_code = status.HTTP_400_BAD_REQUEST
