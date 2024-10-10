@@ -91,7 +91,7 @@ def get_event(response: Response, staff_id: Union[str, None] = None, is_archived
         return {"message": "Staff ID not found"}
     
 # DELETE AN EVENT BY EVENT_ID
-@router.delete("/")
+@router.delete("/{event_id}")
 def delete_event(event_id: str, response: Response):
     try:        
         # Check if event exists
