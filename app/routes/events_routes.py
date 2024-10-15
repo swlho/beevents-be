@@ -26,12 +26,12 @@ def create_event(event: Event, response: Response):
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event already exists"}
 
-        # Add user to users table
+        # Add event to events table
         event = supabase.from_("events")\
             .insert({"staff_id": event.staff_id, "title": event.title, "date_time": event.date_time, "details": event.details, "location": event.location, "tags": event.tags, "users_attending": event.users_attending, "is_archived": event.is_archived, "cost": event.cost})\
             .execute()
 
-        # Check if user was added
+        # Check if event was added
         if event:
             response.status_code = status.HTTP_201_CREATED
             return {"message": "Event created successfully"}
@@ -60,7 +60,7 @@ def get_event(response: Response, event_id: Union[str, None] = None, is_archived
 
 #GET EVENT BY ID
 @router.get("/{event_id}")
-def get_event(response: Response, event_id: Union[str, None] = None):
+def get_event_by_id(response: Response, event_id: Union[str, None] = None):
     try:
         if event_id:
             event = supabase.from_("events")\
@@ -77,7 +77,7 @@ def get_event(response: Response, event_id: Union[str, None] = None):
     
 #GET EVENT BY STAFF ID
 @router.get("/staff/{staff_id}")
-def get_event(response: Response, staff_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
+def get_event_by_staff_id(response: Response, staff_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
     try:
         if staff_id:
             events = supabase.from_("events")\
@@ -95,7 +95,7 @@ def get_event(response: Response, staff_id: Union[str, None] = None, is_archived
     
 # DELETE AN EVENT BY EVENT_ID
 @router.delete("/{event_id}")
-def delete_event(event_id: str, response: Response):
+def delete_event_by_id(event_id: str, response: Response):
     try:        
         # Check if event exists
         if event_exists("event_id", event_id):
