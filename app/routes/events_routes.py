@@ -75,7 +75,7 @@ def get_event_by_id(response: Response, event_id: Union[str, None] = None):
         response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "Event ID not found"}
     
-#GET EVENT BY STAFF ID
+#GET EVENTS BY STAFF ID
 @router.get("/staff/{staff_id}")
 def get_event_by_staff_id(response: Response, staff_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
     try:
@@ -92,6 +92,31 @@ def get_event_by_staff_id(response: Response, staff_id: Union[str, None] = None,
         print(f"Error: {e}")
         response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "Staff ID not found"}
+    
+#GET ACTIVE EVENTS BY USER ID
+@router.get("/user/{user_id}")
+def get_event_by_user_id(response: Response, user_id: Union[str, None] = None):
+    try:
+        if user_id:
+            user_events_arr_data = supabase.from_("profiles")\
+                .select("events_attending")\
+                .eq("id", user_id)\
+                .execute()
+            
+            if user_events_arr_data:
+                events = []
+                for event_id in user_events_arr_data.data[0]["events_attending"]:
+                    event = supabase.from_("events")\
+                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                    .eq("event_id", event_id)\
+                    .execute()
+                    events.append(event)
+                return events
+                
+    except Exception as e:
+        print(f"Error: {e}")
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return {"message": "User is not attending any events"}
     
 # DELETE AN EVENT BY EVENT_ID
 @router.delete("/{event_id}")
