@@ -95,9 +95,9 @@ def get_event_by_staff_id(response: Response, staff_id: Union[str, None] = None,
     
 #GET ACTIVE EVENTS BY USER ID
 @router.get("/user/{user_id}")
-def get_event_by_user_id(response: Response, user_id: Union[str, None] = None):
+def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
     try:
-        if user_id:
+        if user_id and is_archived == False:
             user_events_arr_data = supabase.from_("profiles")\
                 .select("events_attending")\
                 .eq("id", user_id)\
@@ -106,6 +106,22 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None):
             if user_events_arr_data:
                 events = []
                 for event_id in user_events_arr_data.data[0]["events_attending"]:
+                    event = supabase.from_("events")\
+                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                    .eq("event_id", event_id)\
+                    .execute()
+                    events.append(event)
+                return events
+            
+        if user_id and is_archived == True:
+            user_events_arr_data = supabase.from_("profiles")\
+                .select("archived_events")\
+                .eq("id", user_id)\
+                .execute()
+            
+            if user_events_arr_data:
+                events = []
+                for event_id in user_events_arr_data.data[0]["archived_events"]:
                     event = supabase.from_("events")\
                     .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
                     .eq("event_id", event_id)\
