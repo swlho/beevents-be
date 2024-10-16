@@ -107,7 +107,7 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, i
                 events = []
                 for event_id in user_events_arr_data.data[0]["events_attending"]:
                     event = supabase.from_("events")\
-                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                     .eq("event_id", event_id)\
                     .execute()
                     events.append(event)
@@ -123,7 +123,7 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, i
                 events = []
                 for event_id in user_events_arr_data.data[0]["archived_events"]:
                     event = supabase.from_("events")\
-                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost")\
+                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                     .eq("event_id", event_id)\
                     .execute()
                     events.append(event)
