@@ -34,7 +34,7 @@ def create_event(event: Event, response: Response):
         # Check if event was added
         if event:
             response.status_code = status.HTTP_201_CREATED
-            return {"message": "Event created successfully"}
+            return {"message": "Event created successfully", "created_event": event}
         else:
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event creation failed"}
