@@ -40,7 +40,7 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
         .execute()
         if(eventsArr):
             patchEventsArr = eventsArr.data[0]["events_attending"]
-            if(event_id in patchEventsArr):
+            if(event_id in patchEventsArr and book is True):
                 response.status_code = status.HTTP_400_BAD_REQUEST
                 return {"message":"You are already booked into this event", "status code": response.status_code}
             
