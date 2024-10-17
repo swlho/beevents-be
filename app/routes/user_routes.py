@@ -29,9 +29,10 @@ def get_user_by_id(response: Response, user_id: Union[str, None] = None):
         print(f"Error: {e}")
         response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "User ID not found"}
-    
+
+#BOOK OR CANCEL EVENT BOOKING BY USER ID
 @router.patch("/{user_id}/events/{event_id}")
-def patch_booked_event_by_id(user_id:str, event_id:int, response: Response):
+def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: Union[bool, None] = None):
     try:
         eventsArr = supabase.from_("profiles")\
         .select("events_attending")\
@@ -39,12 +40,23 @@ def patch_booked_event_by_id(user_id:str, event_id:int, response: Response):
         .execute()
         if(eventsArr):
             patchEventsArr = eventsArr.data[0]["events_attending"]
-            patchEventsArr.remove(event_id)
+            if(event_id in patchEventsArr):
+                response.status_code = status.HTTP_400_BAD_REQUEST
+                return {"message":"You are already booked into this event", "status code": response.status_code}
+            
+            if(book is True):
+                patchEventsArr.append(event_id)
+            if(book is False):
+                patchEventsArr.remove(event_id)
+
             patch = supabase.from_("profiles")\
             .update({"events_attending": patchEventsArr})\
             .eq("id", user_id)\
             .execute()
-            if(patch):
+            if(patch and book is True):
+                response.status_code = status.HTTP_200_OK
+                return {"message":"Booking successful", "status code": response.status_code, "updated booked events": patchEventsArr}
+            if(patch and book is False):
                 response.status_code = status.HTTP_200_OK
                 return {"message":"Booking cancellation successful", "status code": response.status_code, "updated booked events": patchEventsArr}
     except Exception as e:
