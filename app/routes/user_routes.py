@@ -51,3 +51,25 @@ def patch_booked_event_by_id(user_id:str, event_id:int, response: Response):
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Booking cancellation failed"}
+    
+@router.patch("/{user_id}/archived-events/{event_id}")
+def patch_archived_event_by_id(user_id:str, event_id:int, response: Response):
+    try:
+        archivedEventsArr = supabase.from_("profiles")\
+        .select("archived_events")\
+        .eq("id",user_id)\
+        .execute()
+        if(archivedEventsArr):
+            patchArchivedEventsArr = archivedEventsArr.data[0]["archived_events"]
+            patchArchivedEventsArr.remove(event_id)
+            patch = supabase.from_("profiles")\
+            .update({"archived_events": patchArchivedEventsArr})\
+            .eq("id", user_id)\
+            .execute()
+            if(patch):
+                response.status_code = status.HTTP_200_OK
+                return {"message":"Delete archived event successful", "status code": response.status_code, "updated archived events": patchArchivedEventsArr}
+    except Exception as e:
+        print(f"Error: {e}")
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return {"message": "Delete archived event failed"}
