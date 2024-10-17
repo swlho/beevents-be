@@ -29,3 +29,25 @@ def get_user_by_id(response: Response, user_id: Union[str, None] = None):
         print(f"Error: {e}")
         response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "User ID not found"}
+    
+@router.patch("/{user_id}/events/{event_id}")
+def patch_booked_event_by_id(user_id:str, event_id:int, response: Response):
+    try:
+        eventsArr = supabase.from_("profiles")\
+        .select("events_attending")\
+        .eq("id",user_id)\
+        .execute()
+        if(eventsArr):
+            patchEventsArr = eventsArr.data[0]["events_attending"]
+            patchEventsArr.remove(event_id)
+            patch = supabase.from_("profiles")\
+            .update({"events_attending": patchEventsArr})\
+            .eq("id", user_id)\
+            .execute()
+            if(patch):
+                response.status_code = status.HTTP_200_OK
+                return {"message":"Booking cancellation successful", "updated booked events": patchEventsArr}
+    except Exception as e:
+        print(f"Error: {e}")
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return {"message": "Booking cancellation failed"}
