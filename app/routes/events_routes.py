@@ -166,7 +166,6 @@ def update_event(event_id: str, response: Response, is_archived: Union[bool, Non
             event = supabase.from_("events")\
             .update({"is_archived": is_archived})\
             .eq("event_id", event_id).execute()
-            print(event.data[0]["is_archived"])
             if event and event.data[0]["is_archived"] == True:
                 response.status_code = status.HTTP_200_OK
                 return {"message": "Event archived successfully", "event": event.data}
