@@ -46,7 +46,7 @@ def patch_booked_event_by_id(user_id:str, event_id:int, response: Response):
             .execute()
             if(patch):
                 response.status_code = status.HTTP_200_OK
-                return {"message":"Booking cancellation successful", "updated booked events": patchEventsArr}
+                return {"message":"Booking cancellation successful", "status code": response.status_code, "updated booked events": patchEventsArr}
     except Exception as e:
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
