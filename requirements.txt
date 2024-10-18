@@ -7,3 +7,5 @@ supabase
 bcrypt
 
 uvicorn
+
+stripe
