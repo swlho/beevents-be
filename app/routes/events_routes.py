@@ -185,7 +185,7 @@ def update_event(event_id: str, response: Response, is_archived: Union[bool, Non
         return {"message": "Event update failed"}
     
 #PATCH EVENT BY ID - ADD STRIPE PAYMENT LINK
-@router.patch("/{event_id}/{payment_url}")
+@router.patch("/url/{event_id}/{payment_url}")
 def update_event_paymenturl(event_id:str, payment_url:str, response: Response):
     try:
         # Check if event exists
