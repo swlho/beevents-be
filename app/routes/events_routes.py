@@ -33,8 +33,12 @@ def create_event(event: Event, response: Response):
 
         # Check if event was added
         if event:
+            response_event = supabase.from_("events")\
+            .select("event_id","staff_id", "title", "date_time", "details", "location", "tags", "users_attending", "is_archived", "cost")\
+            .eq("event_id", event.data[0]["event_id"])\
+            .execute()
             response.status_code = status.HTTP_201_CREATED
-            return {"message": "Event created successfully", "created_event": event}
+            return {"message": "Event created successfully", "created_event": response_event}
         else:
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event creation failed"}
