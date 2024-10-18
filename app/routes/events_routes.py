@@ -38,7 +38,7 @@ def create_event(event: Event, response: Response):
             .eq("event_id", event.data[0]["event_id"])\
             .execute()
             response.status_code = status.HTTP_201_CREATED
-            return {"message": "Event created successfully", "created_event": response_event}
+            return {"message": "Event created successfully", "status_code": response.status_code, "created_event": response_event}
         else:
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event creation failed"}
