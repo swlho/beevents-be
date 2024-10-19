@@ -34,31 +34,37 @@ def get_user_by_id(response: Response, user_id: Union[str, None] = None):
 @router.patch("/{user_id}/events/{event_id}")
 def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: Union[bool, None] = None):
     try:
-        eventsArr = supabase.from_("profiles")\
-        .select("events_attending")\
-        .eq("id",user_id)\
+        events = supabase.from_("bookings")\
+        .select("event_id")\
+        .eq("user_id", user_id)\
         .execute()
-        if(eventsArr):
-            patchEventsArr = eventsArr.data[0]["events_attending"]
-            if(event_id in patchEventsArr and book is True):
-                response.status_code = status.HTTP_400_BAD_REQUEST
-                return {"message":"You are already booked into this event", "status code": response.status_code}
+        
+        if(events):
+            eventsArr = events.data
+            for event in eventsArr:
+                if(event_id is event["event_id"] and book is True):
+                    response.status_code = status.HTTP_400_BAD_REQUEST
+                    return {"message":"You are already booked into this event", "status code": response.status_code}
             
             if(book is True):
-                patchEventsArr.append(event_id)
-            if(book is False):
-                patchEventsArr.remove(event_id)
+                data = supabase.from_("bookings")\
+                .insert({"event_id":event_id, "user_id": user_id})\
+                .execute()
 
-            patch = supabase.from_("profiles")\
-            .update({"events_attending": patchEventsArr})\
-            .eq("id", user_id)\
-            .execute()
-            if(patch and book is True):
-                response.status_code = status.HTTP_200_OK
-                return {"message":"Booking successful", "status code": response.status_code, "updated booked events": patchEventsArr}
-            if(patch and book is False):
-                response.status_code = status.HTTP_200_OK
-                return {"message":"Booking cancellation successful", "status code": response.status_code, "updated booked events": patchEventsArr}
+                if(response):
+                    response.status_code = status.HTTP_200_OK
+                    return {"message":"Booking successful", "status code": response.status_code}
+                
+            if(book is False):
+                data = supabase.from_("bookings")\
+                .delete()\
+                .eq("user_id", user_id)\
+                .eq("event_id", event_id)\
+                .execute()
+                if(response):
+                    response.status_code = status.HTTP_200_OK
+                    return {"message":"Booking cancellation successful", "status code": response.status_code}
+                    
     except Exception as e:
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
