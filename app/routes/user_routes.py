@@ -69,7 +69,8 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Booking cancellation failed"}
-    
+
+#PATCH USER'S ARCHIVED EVENTS (DELETE FROM USER'S ARCHIVED EVENTS)    
 @router.patch("/{user_id}/archived-events/{event_id}")
 def patch_archived_event_by_id(user_id:str, event_id:int, response: Response):
     try:
@@ -97,55 +98,27 @@ def patch_archived_event_by_id(user_id:str, event_id:int, response: Response):
 @router.patch("/{user_id}/archive/{event_id}")
 def patch_toggle_archive_event(user_id:str, event_id: int, response: Response, archive: Union[bool, None] = None):
     try:
-        if(archive):
-            eventsArr = supabase.from_("profiles")\
-            .select("events_attending", "archived_events")\
-            .eq("id", user_id)\
+        if(archive is True):
+            data = supabase.from_("bookings")\
+            .update({"user_archived": True})\
+            .eq("user_id", user_id)\
+            .eq("event_id", event_id)\
             .execute()
-            if(eventsArr):
-                patchEventsArr = eventsArr.data[0]["events_attending"]
-                patchEventsArr.remove(event_id)
-                patchArchivedEventsArr = eventsArr.data[0]["archived_events"]
-                patchArchivedEventsArr.append(event_id)
 
-                patch_events_attending = supabase.from_("profiles")\
-                .update({"events_attending": patchEventsArr})\
-                .eq("id", user_id)\
-                .execute()
+            if(data):
+                response.status_code = status.HTTP_200_OK
+                return {"message":"Event archiving successful", "status code": response.status_code}
 
-                patch_archived_events = supabase.from_("profiles")\
-                .update({"archived_events":patchArchivedEventsArr})\
-                .eq("id", user_id)\
-                .execute()
-
-                if(patch_events_attending and patch_archived_events):
-                    response.status_code = status.HTTP_200_OK
-                    return {"message":"Event archiving successful", "status code": response.status_code}
-
-        if(not archive):
-            eventsArr = supabase.from_("profiles")\
-            .select("events_attending", "archived_events")\
-            .eq("id", user_id)\
+        if(archive is False):
+            data = supabase.from_("bookings")\
+            .update({"user_archived": False})\
+            .eq("user_id", user_id)\
+            .eq("event_id", event_id)\
             .execute()
-            if(eventsArr):
-                patchArchivedEventsArr = eventsArr.data[0]["archived_events"]
-                patchArchivedEventsArr.remove(event_id)
-                patchEventsArr = eventsArr.data[0]["events_attending"]
-                patchEventsArr.append(event_id)
 
-                patch_events_attending = supabase.from_("profiles")\
-                .update({"events_attending": patchEventsArr})\
-                .eq("id", user_id)\
-                .execute()
-
-                patch_archived_events = supabase.from_("profiles")\
-                .update({"archived_events":patchArchivedEventsArr})\
-                .eq("id", user_id)\
-                .execute()
-
-                if(patch_events_attending and patch_archived_events):
-                    response.status_code = status.HTTP_200_OK
-                    return {"message":"Event unarchiving successful", "status code": response.status_code}
+            if(data):
+                response.status_code = status.HTTP_200_OK
+                return {"message":"Event unarchiving successful", "status code": response.status_code}
 
     except Exception as e:
         print(f"Error: {e}")
