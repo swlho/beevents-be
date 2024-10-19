@@ -109,13 +109,15 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, i
             .execute()
         
             if user_events_arr_data:
-                print(user_events_arr_data)
+                events = []
                 for event_id in user_events_arr_data.data:
-                    events = supabase.from_("events")\
+                    event = supabase.from_("events")\
                     .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                     .eq("event_id", event_id["event_id"])\
                     .eq("is_archived", False)\
                     .execute()
+                    if(event.data):
+                        events.append(event)
                 return events
             
         if user_id and is_archived == True:            
@@ -126,12 +128,16 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, i
             .execute()
         
             if user_events_arr_data:
+                print(user_events_arr_data)
+                events=[]
                 for event_id in user_events_arr_data.data:
-                    events = supabase.from_("events")\
+                    event = supabase.from_("events")\
                     .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                     .eq("event_id", event_id["event_id"])\
                     .eq("is_archived", False)\
                     .execute()
+                    if(event.data):
+                        events.append(event)
                 return events
                 
     except Exception as e:
