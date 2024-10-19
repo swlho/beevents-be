@@ -102,38 +102,54 @@ def get_event_by_staff_id(response: Response, staff_id: Union[str, None] = None,
 def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
     try:
         if user_id and is_archived == False:
-            user_events_arr_data = supabase.from_("profiles")\
-                .select("events_attending")\
+            user = supabase.from_("profiles")\
+                .select("id")\
                 .eq("id", user_id)\
                 .execute()
             
-            if user_events_arr_data:
-                events = []
-                for event_id in user_events_arr_data.data[0]["events_attending"]:
-                    event = supabase.from_("events")\
-                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
-                    .eq("event_id", event_id)\
-                    .eq("is_archived", False)\
-                    .execute()
-                    events.append(event)
-                return events
+            if user:
+                user_events_arr_data = supabase.from_("bookings")\
+                .select("event_id")\
+                .eq("user_id", user.data[0]["id"])\
+                .eq("user_archived", False)\
+                .execute()
+            
+                if user_events_arr_data:
+                    print(user_events_arr_data)
+                    events = []
+                    for event_id in user_events_arr_data.data:
+                        event = supabase.from_("events")\
+                        .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
+                        .eq("event_id", event_id["event_id"])\
+                        .eq("is_archived", False)\
+                        .execute()
+                        events.append(event)
+                    return events
             
         if user_id and is_archived == True:
-            user_events_arr_data = supabase.from_("profiles")\
-                .select("archived_events")\
+            user = supabase.from_("profiles")\
+                .select("id")\
                 .eq("id", user_id)\
                 .execute()
             
-            if user_events_arr_data:
-                events = []
-                for event_id in user_events_arr_data.data[0]["archived_events"]:
-                    event = supabase.from_("events")\
-                    .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
-                    .eq("event_id", event_id)\
-                    .eq("is_archived", False)\
-                    .execute()
-                    events.append(event)
-                return events
+            if user:
+                user_events_arr_data = supabase.from_("bookings")\
+                .select("event_id")\
+                .eq("user_id", user.data[0]["id"])\
+                .eq("user_archived", True)\
+                .execute()
+            
+                if user_events_arr_data:
+                    print(user_events_arr_data)
+                    events = []
+                    for event_id in user_events_arr_data.data:
+                        event = supabase.from_("events")\
+                        .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
+                        .eq("event_id", event_id["event_id"])\
+                        .eq("is_archived", False)\
+                        .execute()
+                        events.append(event)
+                    return events
                 
     except Exception as e:
         print(f"Error: {e}")
