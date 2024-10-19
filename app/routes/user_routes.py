@@ -70,24 +70,20 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Booking cancellation failed"}
 
-#PATCH USER'S ARCHIVED EVENTS (DELETE FROM USER'S ARCHIVED EVENTS)    
-@router.patch("/{user_id}/archived-events/{event_id}")
-def patch_archived_event_by_id(user_id:str, event_id:int, response: Response):
+#DELETE FROM USER'S ARCHIVED EVENTS
+@router.delete("/{user_id}/archived-events/{event_id}")
+def delete_archived_event_by_id(user_id:str, event_id:int, response: Response):
     try:
-        archivedEventsArr = supabase.from_("profiles")\
-        .select("archived_events")\
-        .eq("id",user_id)\
+        data = supabase.from_("bookings")\
+        .delete()\
+        .eq("user_id",user_id)\
+        .eq("event_id", event_id)\
+        .eq("user_archived", True)\
         .execute()
-        if(archivedEventsArr):
-            patchArchivedEventsArr = archivedEventsArr.data[0]["archived_events"]
-            patchArchivedEventsArr.remove(event_id)
-            patch = supabase.from_("profiles")\
-            .update({"archived_events": patchArchivedEventsArr})\
-            .eq("id", user_id)\
-            .execute()
-            if(patch):
-                response.status_code = status.HTTP_200_OK
-                return {"message":"Delete archived event successful", "status code": response.status_code, "updated archived events": patchArchivedEventsArr}
+            
+        if(data):
+            response.status_code = status.HTTP_200_OK
+            return {"message":"Delete archived event successful", "status code": response.status_code}
     except Exception as e:
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
