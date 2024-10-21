@@ -189,20 +189,21 @@ def update_event(event_id: str, response: Response, is_archived: Union[bool, Non
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Event update failed"}
     
-#PATCH EVENT BY ID - ADD STRIPE PAYMENT LINK
-@router.patch("/url/{event_id}/{payment_url}")
-def update_event_paymenturl(event_id:str, payment_url:str, response: Response):
+#PATCH EVENT BY ID - ADD STRIPE PAYMENT LINK AND PRICE ID
+@router.patch("/url/{event_id}/{payment_url}/{price_id}")
+def update_event_paymenturl(event_id:str, payment_url:str, price_id:str, response: Response):
     try:
         # Check if event exists
         if event_exists("event_id", event_id):
             patchUrl = payment_url
+            patchPriceId = price_id
             url = supabase.from_("events")\
-            .update({"payment_url": patchUrl})\
+            .update({"payment_url": patchUrl, "price_id":patchPriceId})\
             .eq("event_id", event_id)\
             .execute()
             if url:
                 response.status_code = status.HTTP_200_OK
-                return {"message": "Event payment url added successfully", "status_code":response.status_code, "data":{"event_id":event_id, "payment_url": payment_url}}
+                return {"message": "Event payment url added successfully", "status_code":response.status_code, "data":{"event_id":event_id, "payment_url": payment_url, "price_id":price_id}}
     except Exception as e:
         print(f"Error: {e}")
         response.status_code = status.HTTP_400_BAD_REQUEST
