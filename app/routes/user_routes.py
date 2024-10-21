@@ -52,24 +52,24 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
                         response.status_code = status.HTTP_400_BAD_REQUEST
                         return {"message":"You are already booked into this event", "status code": response.status_code}
                 
-                if(book is True):
-                    data = supabase.from_("bookings")\
-                    .insert({"event_id":event_id, "user_id": user_id})\
-                    .execute()
+            if(book is False):
+                data = supabase.from_("bookings")\
+                .delete()\
+                .eq("user_id", user_id)\
+                .eq("event_id", event_id)\
+                .execute()
+                if(data):
+                    response.status_code = status.HTTP_200_OK
+                    return {"message":"Booking cancellation successful", "status code": response.status_code}
 
-                    if(response):
-                        response.status_code = status.HTTP_200_OK
-                        return {"message":"Booking successful", "status code": response.status_code}
-                    
-                if(book is False):
-                    data = supabase.from_("bookings")\
-                    .delete()\
-                    .eq("user_id", user_id)\
-                    .eq("event_id", event_id)\
-                    .execute()
-                    if(response):
-                        response.status_code = status.HTTP_200_OK
-                        return {"message":"Booking cancellation successful", "status code": response.status_code}
+            if(book is True):
+                data = supabase.from_("bookings")\
+                .insert({"event_id":event_id, "user_id": user_id})\
+                .execute()
+
+            if(data):
+                response.status_code = status.HTTP_200_OK
+                return {"message":"Booking successful", "status code": response.status_code}
                         
         except Exception as e:
             print(f"Error: {e}")
@@ -78,6 +78,18 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
     
     if cost > 0:
         try:
+            events = supabase.from_("bookings")\
+            .select("event_id")\
+            .eq("user_id", user_id)\
+            .execute()
+        
+            if(events):
+                eventsArr = events.data
+                for event in eventsArr:
+                    if(event_id is event["event_id"] and book is True):
+                        response.status_code = status.HTTP_400_BAD_REQUEST
+                        return {"message":"You are already booked into this event", "status code": response.status_code}
+            
             if(book is False):
                 data = supabase.from_("bookings")\
                 .delete()\
@@ -87,44 +99,32 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
                 if(response):
                     response.status_code = status.HTTP_200_OK
                     return {"message":"Booking cancellation successful", "status code": response.status_code}
-            
+        
             if(book is True):
-                events = supabase.from_("bookings")\
-                .select("event_id")\
-                .eq("user_id", user_id)\
+                price_id = supabase.from_("events")\
+                .select("price_id")\
+                .eq("event_id", event_id)\
                 .execute()
-            
-                if(events):
-                    eventsArr = events.data
-                    for event in eventsArr:
-                        if(event_id is event["event_id"] and book is True):
-                            response.status_code = status.HTTP_400_BAD_REQUEST
-                            return {"message":"You are already booked into this event", "status code": response.status_code}
-                    
-                    price_id = supabase.from_("events")\
-                    .select("price_id")\
-                    .eq("event_id", event_id)\
-                    .execute()
 
-                    domain_url = "http://localhost:3000"
-                    patchPriceId = price_id.data[0]["price_id"]
+                domain_url = "http://localhost:3000"
+                patchPriceId = price_id.data[0]["price_id"]
 
-                    checkout_session = stripe.checkout.Session.create(
-                        line_items=[{
-                            'price': patchPriceId,
-                            'quantity': 1,
-                        }],
-                        metadata={
-                            "user_id": user_id,
-                            "event_id": event_id,
-                            "cost": cost,
-                        },
-                        mode='payment',
-                        success_url = domain_url +'/success.html',
-                        cancel_url = domain_url +'/cancel.html',
-                    )
-                    response.status_code = status.HTTP_303_SEE_OTHER
-                    return {"url":checkout_session.url, "status_code":response.status_code}
+                checkout_session = stripe.checkout.Session.create(
+                    line_items=[{
+                        'price': patchPriceId,
+                        'quantity': 1,
+                    }],
+                    metadata={
+                        "user_id": user_id,
+                        "event_id": event_id,
+                        "cost": cost,
+                    },
+                    mode='payment',
+                    success_url = domain_url +'/success.html',
+                    cancel_url = domain_url +'/cancel.html',
+                )
+                response.status_code = status.HTTP_303_SEE_OTHER
+                return {"url":checkout_session.url, "status_code":response.status_code}
             
         except Exception as e:
             print(f"Error: {e}")
