@@ -177,10 +177,10 @@ def update_event(event_id: str, response: Response, is_archived: Union[bool, Non
             .eq("event_id", event_id).execute()
             if event and event.data[0]["is_archived"] == True:
                 response.status_code = status.HTTP_200_OK
-                return {"message": "Event archived successfully", "event": event.data}
+                return {"message": "Event archived successfully", "status_code":response.status_code, "event": event.data}
             elif event and event.data[0]["is_archived"] == False:
                 response.status_code = status.HTTP_200_OK
-                return {"message": "Event unarchived successfully", "event": event.data}
+                return {"message": "Event unarchived successfully", "status_code":response.status_code, "event": event.data}
         else:
             response.status_code = status.HTTP_400_BAD_REQUEST
             return {"message": "Event update failed"}
