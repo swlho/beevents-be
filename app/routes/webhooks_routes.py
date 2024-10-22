@@ -1,33 +1,31 @@
-from fastapi import FastAPI, Request, HTTPException, Header
+from fastapi import APIRouter, FastAPI, Request, HTTPException, Header
 from app.webhook_util import fulfill_checkout
+from config import webhook_secret
 import stripe
 
-app = FastAPI()
+router = APIRouter()
+webhook_secret: str = webhook_secret
 
-# Use the secret provided by Stripe CLI for local testing
-# or your webhook endpoint's secret.
-endpoint_secret = 'whsec_...'
-
-@app.post("/webhook")
-async def stripe_webhook(request: Request, stripe_signature: str = Header(None)):
-    payload = await request.body()
-    event = None
+@router.post("/checkout-complete")
+async def stripe_webhook(
+    event: dict,
+    request: Request,
+    stripe_signature=Header(None),
+):
+    raw_body = await request.body()
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, stripe_signature, endpoint_secret
+            payload=raw_body,
+            sig_header=stripe_signature,
+            secret=webhook_secret,
         )
-    except ValueError:
-        # Invalid payload
-        raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError:
-        # Invalid signature
-        raise HTTPException(status_code=400, detail="Invalid signature")
+    except Exception as e:
+        raise HTTPException(422, detail=str(e))
 
-    if (
-        event['type'] == 'checkout.session.completed'
-        or event['type'] == 'checkout.session.async_payment_succeeded'
-    ):
-        fulfill_checkout(event['data']['object']['id'])
+    data = event["data"]["object"]
+    if event["type"] == "checkout.session.completed":
+        # your custom function to run after a successful payment
+        print('Succesful checkout')
 
-    return {"status": "success"}
+    return 200
