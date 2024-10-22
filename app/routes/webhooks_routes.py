@@ -1,5 +1,4 @@
 from fastapi import APIRouter, FastAPI, Request, HTTPException, Header
-from app.webhook_util import fulfill_checkout
 from config import webhook_secret
 import stripe
 
