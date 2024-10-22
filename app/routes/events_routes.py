@@ -1,3 +1,4 @@
+import datetime
 from typing import Union
 from fastapi import APIRouter, Response, status
 from db.supabase import create_supabase_client
@@ -47,13 +48,15 @@ def create_event(event: Event, response: Response):
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"message": "Event creation failed"}
     
-# GET ALL EVENTS
+# GET ALL FUTURE EVENTS
 @router.get("/")
 def get_event(response: Response, event_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
     try:
+        date_time_now = datetime.datetime.now().replace(microsecond=0).isoformat()
         events = supabase.from_("events")\
             .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
             .eq("is_archived", is_archived)\
+            .gte("date_time", date_time_now)\
             .execute()
         if events:
             return events
