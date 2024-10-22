@@ -120,8 +120,8 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
                         "cost": cost,
                     },
                     mode='payment',
-                    success_url = domain_url +'/success.html',
-                    cancel_url = domain_url +'/cancel.html',
+                    success_url = domain_url +'/success',
+                    cancel_url = domain_url +'/',
                 )
                 response.status_code = status.HTTP_303_SEE_OTHER
                 return {"url":checkout_session.url, "status_code":response.status_code}
