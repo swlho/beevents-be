@@ -128,7 +128,7 @@ def patch_book_event_by_id(user_id:str, event_id:int, response: Response, book: 
                 .eq("event_id", event_id)\
                 .execute()
 
-                domain_url = "http://localhost:3000"
+                domain_url = "https://beevents.vercel.app"
                 patchPriceId = price_id.data[0]["price_id"]
 
                 checkout_session = stripe.checkout.Session.create(
