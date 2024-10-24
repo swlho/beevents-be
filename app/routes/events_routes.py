@@ -50,14 +50,22 @@ def create_event(event: Event, response: Response):
     
 # GET ALL FUTURE EVENTS
 @router.get("/")
-def get_event(response: Response, event_id: Union[str, None] = None, is_archived: Union[bool, None] = None):
+def get_event(response: Response, is_archived: Union[bool, None] = None, order_by: Union[str, None] = None, descending: Union[bool, None] = None):
+    
+    order_by_cat = ["title", "date_time", "cost"]
+    
     try:
         date_time_now = datetime.datetime.now().replace(microsecond=0).isoformat()
-        events = supabase.from_("events")\
+        query = supabase.from_("events")\
             .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
             .eq("is_archived", is_archived)\
-            .gte("date_time", date_time_now)\
-            .execute()
+            .gte("date_time", date_time_now)
+        
+        if order_by:
+            if order_by in order_by_cat:
+                query = query.order(order_by, desc=descending)
+
+        events = query.execute()
         if events:
             return events
     except Exception as e:
