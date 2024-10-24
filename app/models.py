@@ -1,10 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List
 
-class User(BaseModel):
-    first_name: str
-    last_name: str
-    password: str
-    email: str
+class UpdateUserModel(BaseModel):
+    full_name: Optional[str]
+
 
 
 class Event(BaseModel):

@@ -1,6 +1,8 @@
+import datetime
 import os
 from typing import Union
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Body, Response, status
+from app.models import UpdateUserModel
 from db.supabase import create_supabase_client
 #fn dependencies
 import bcrypt
@@ -24,7 +26,7 @@ def get_user_by_id(response: Response, user_id: Union[str, None] = None):
     try:
         if user_id:
             user = supabase.from_("profiles")\
-                .select("id", "updated_at", "full_name", "email", "events_attending", "archived_events")\
+                .select("id", "updated_at", "full_name", "email")\
                 .eq("id", user_id)\
                 .execute()
 
@@ -34,6 +36,26 @@ def get_user_by_id(response: Response, user_id: Union[str, None] = None):
         print(f"Error: {e}")
         response.status_code = status.HTTP_204_NO_CONTENT
         return {"message": "User ID not found"}
+    
+#PATCH USER'S NAME BY ID
+@router.patch("/{user_id}")
+def patch_user(user_id: str, response: Response, request: UpdateUserModel = Body(...)):
+    request = {k:v for k,v in request.model_dump().items() if v is not None}
+    date_time_now = datetime.datetime.now().replace(microsecond=0).isoformat()
+    try:
+        if user_exists("id", user_id):
+            if 'full_name' in request.keys():
+                user = supabase.from_("profiles")\
+                .update({'full_name':request['full_name'], 'updated_at': date_time_now})\
+                .eq("id", user_id)\
+                .execute()
+                if user:
+                    response.status_code = status.HTTP_200_OK
+                    return {"message": "User profile updated successfully", "status_code":response.status_code, "updated_user_data": user.data}
+    except Exception as e:
+        print(f"Error: {e}")
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return {"message": "User profile update failed"}
 
 #BOOK OR CANCEL EVENT BOOKING BY USER ID
 @router.patch("/{user_id}/events/{event_id}")
