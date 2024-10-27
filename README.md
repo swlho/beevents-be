@@ -24,6 +24,8 @@ To configure this project locally, please follow these steps:
 
 * Python (minimum version: v3)
 * Node (minimum version: v20)
+* Supabase postgres database project instance and api key - refer to Supabase documentation on how to do this
+* Stripe API account with own API key and a created webhook for 'checkout session' - refer to Stripe documentation on how to do this
 
 ### Installation
 
@@ -46,7 +48,18 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-**3. Run the project locally:**
+**3. Create config file:**
+
+In the project root folder, create a file 'config.py', and populate it with the following key/values, replacing the values with your own instances (n.b. values are strings):
+
+```
+url = <SUPABASE PROJECT URL>
+api = <SUPABASE API KEY>
+stripe_api_key = <STRIPE API KEY>
+webhook_secret = <STRIPE WEBHOOK SECRET>
+```
+
+**4. Run the project locally:**
 
 ```
 uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload
