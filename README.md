@@ -27,7 +27,7 @@ To configure this project locally, please follow these steps:
 * Supabase postgres database project instance and api key - refer to Supabase documentation on how to do this
 * Stripe API account with own API key and a created webhook for 'checkout session' - refer to Stripe documentation on how to do this
 
-### Installation
+### Installation for local development
 
 **1. Clone the repository:**
 
