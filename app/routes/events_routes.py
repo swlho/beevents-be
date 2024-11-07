@@ -99,6 +99,7 @@ def get_event_by_staff_id(response: Response, staff_id: Union[str, None] = None,
                 .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                 .eq("staff_id", staff_id)\
                 .eq("is_archived", is_archived)\
+                .order("date_time", desc=False)\
                 .execute()
 
             if events:
@@ -126,6 +127,7 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, i
                     .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                     .eq("event_id", event_id["event_id"])\
                     .eq("is_archived", False)\
+                    .order("date_time", desc=False)\
                     .execute()
                     if(event.data):
                         events.append(event)
@@ -139,13 +141,13 @@ def get_event_by_user_id(response: Response, user_id: Union[str, None] = None, i
             .execute()
         
             if user_events_arr_data:
-                print(user_events_arr_data)
                 events=[]
                 for event_id in user_events_arr_data.data:
                     event = supabase.from_("events")\
                     .select("event_id", "title", "date_time", "details", "location", "tags", "cost", "is_archived")\
                     .eq("event_id", event_id["event_id"])\
                     .eq("is_archived", False)\
+                    .order("date_time", desc=False)\
                     .execute()
                     if(event.data):
                         events.append(event)
